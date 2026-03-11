@@ -1,8 +1,8 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/format';
 
-export const HistoryTable = ({ records, onDelete }) => {
+export const HistoryTable = ({ records, onDelete, onEdit }) => {
   if (!records || records.length === 0) {
     return null;
   }
@@ -32,7 +32,15 @@ export const HistoryTable = ({ records, onDelete }) => {
               <td>{formatCurrency(record.usTotalNtd)}</td>
               <td style={{ fontWeight: '600', color: 'var(--success)' }}>{formatCurrency(record.totalNtd)}</td>
               <td style={{ color: 'var(--text-secondary)' }}>{record.exchangeRate.toFixed(2)}</td>
-              <td>
+              <td style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  onClick={() => onEdit(record)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.4rem', borderRadius: '4px' }}
+                  title="Edit record"
+                >
+                  <Pencil size={16} />
+                </button>
                 <button 
                   onClick={() => onDelete(record.id)}
                   className="btn btn-danger"

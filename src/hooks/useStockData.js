@@ -56,6 +56,27 @@ export const useStockData = () => {
     setRecords(prev => prev.filter(r => r.id !== id));
   };
 
+  const editRecord = (id, updatedRecord) => {
+    const cashTotalNtd = updatedRecord.bankCash + updatedRecord.settlement;
+    const twTotalNtd = updatedRecord.twStocks;
+    const usTotalNtd = updatedRecord.usStocksUsd * updatedRecord.exchangeRate;
+    const totalNtd = twTotalNtd + cashTotalNtd + usTotalNtd;
+
+    const recordWithTotals = {
+      ...updatedRecord,
+      id, 
+      cashTotalNtd,
+      twTotalNtd,
+      usTotalNtd,
+      totalNtd,
+    };
+
+    setRecords(prev => {
+      const updated = prev.map(r => r.id === id ? recordWithTotals : r);
+      return updated.sort((a, b) => b.timestamp - a.timestamp);
+    });
+  };
+
   /**
    * Calculate summary metrics comparing the latest record to the previous one
    */
@@ -98,6 +119,7 @@ export const useStockData = () => {
     records,
     addRecord,
     deleteRecord,
+    editRecord,
     summary: getSummary()
   };
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchUsdToTwdRate } from '../services/ExchangeRateService';
-import { PlusCircle, RefreshCw } from 'lucide-react';
+import { PlusCircle, RefreshCw, Save, X } from 'lucide-react';
 
-export const DataEntryForm = ({ onAddRecord }) => {
+export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearEditing }) => {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     twStocks: '',
@@ -16,8 +16,27 @@ export const DataEntryForm = ({ onAddRecord }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    loadExchangeRate();
-  }, []);
+    if (editingRecord) {
+      const dateStr = new Date(editingRecord.timestamp).toISOString().split('T')[0];
+      setFormData({
+        date: dateStr,
+        twStocks: editingRecord.twStocks,
+        bankCash: editingRecord.bankCash,
+        settlement: editingRecord.settlement,
+        usStocksUsd: editingRecord.usStocksUsd,
+      });
+      setExchangeRate(editingRecord.exchangeRate);
+    } else {
+      setFormData({
+        date: new Date().toISOString().split('T')[0],
+        twStocks: '',
+        bankCash: '',
+        settlement: '',
+        usStocksUsd: '',
+      });
+      loadExchangeRate();
+    }
+  }, [editingRecord]);
 
   const loadExchangeRate = async () => {
     setIsLoadingRate(true);
@@ -37,7 +56,7 @@ export const DataEntryForm = ({ onAddRecord }) => {
     
     setIsSubmitting(true);
     
-    const newRecord = {
+    const recordData = {
       timestamp: new Date(formData.date).getTime(),
       twStocks: Number(formData.twStocks) || 0,
       bankCash: Number(formData.bankCash) || 0,
@@ -46,16 +65,19 @@ export const DataEntryForm = ({ onAddRecord }) => {
       exchangeRate: exchangeRate,
     };
 
-    onAddRecord(newRecord);
-    
-    // Optional: Reset form fields, except date
-    setFormData(prev => ({
-      ...prev,
-      twStocks: '',
-      bankCash: '',
-      settlement: '',
-      usStocksUsd: '',
-    }));
+    if (editingRecord) {
+      onEditRecord(editingRecord.id, recordData);
+      clearEditing();
+    } else {
+      onAddRecord(recordData);
+      setFormData(prev => ({
+        ...prev,
+        twStocks: '',
+        bankCash: '',
+        settlement: '',
+        usStocksUsd: '',
+      }));
+    }
     
     setIsSubmitting(false);
   };
@@ -63,8 +85,11 @@ export const DataEntryForm = ({ onAddRecord }) => {
   return (
     <div className="glass-panel animate-fade-in" style={{ animationDelay: '0.1s' }}>
       <h2 className="title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <PlusCircle size={24} color="var(--accent-primary)" />
-        Add New Entry
+        {editingRecord ? (
+          <><Save size={24} color="var(--accent-primary)" /> Edit Record</>
+        ) : (
+          <><PlusCircle size={24} color="var(--accent-primary)" /> Add New Entry</>
+        )}
       </h2>
       
       <form onSubmit={handleSubmit}>
@@ -162,9 +187,19 @@ export const DataEntryForm = ({ onAddRecord }) => {
           </div>
         </div>
 
-        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+          {editingRecord && (
+            <button 
+              type="button" 
+              className="btn btn-secondary" 
+              onClick={clearEditing}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <X size={18} /> Cancel
+            </button>
+          )}
           <button type="submit" className="btn btn-primary" disabled={isSubmitting || isLoadingRate || !exchangeRate}>
-            Save Record
+            {editingRecord ? 'Update Record' : 'Save Record'}
           </button>
         </div>
       </form>

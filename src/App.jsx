@@ -7,7 +7,13 @@ import { HistoryTable } from './components/HistoryTable';
 import { LineChart } from 'lucide-react';
 
 function App() {
-  const { records, addRecord, deleteRecord, summary } = useStockData();
+  const { records, addRecord, deleteRecord, editRecord, summary } = useStockData();
+  const [editingRecord, setEditingRecord] = React.useState(null);
+
+  const handleEdit = (record) => {
+    setEditingRecord(record);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="container">
@@ -26,11 +32,20 @@ function App() {
       <Dashboard summary={summary} />
 
       <div className="grid-2">
-        <DataEntryForm onAddRecord={addRecord} />
+        <DataEntryForm 
+          onAddRecord={addRecord} 
+          editingRecord={editingRecord}
+          onEditRecord={editRecord}
+          clearEditing={() => setEditingRecord(null)}
+        />
         <Charts records={records} />
       </div>
 
-      <HistoryTable records={records} onDelete={deleteRecord} />
+      <HistoryTable 
+        records={records} 
+        onDelete={deleteRecord} 
+        onEdit={handleEdit}
+      />
     </div>
   );
 }
