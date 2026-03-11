@@ -1,0 +1,38 @@
+import React from 'react';
+import { useStockData } from './hooks/useStockData';
+import { Dashboard } from './components/Dashboard';
+import { DataEntryForm } from './components/DataEntryForm';
+import { Charts } from './components/Charts';
+import { HistoryTable } from './components/HistoryTable';
+import { LineChart } from 'lucide-react';
+
+function App() {
+  const { records, addRecord, deleteRecord, summary } = useStockData();
+
+  return (
+    <div className="container">
+      <header className="flex-between" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ background: 'var(--accent-glow)', padding: '0.75rem', borderRadius: '12px' }}>
+            <LineChart size={32} color="var(--accent-primary)" />
+          </div>
+          <div>
+            <h1 className="title" style={{ margin: 0, fontSize: '1.75rem' }}>Portfolio Tracker</h1>
+            <p className="text-neutral">Track your Taiwan & US stock investments</p>
+          </div>
+        </div>
+      </header>
+
+      <Dashboard summary={summary} />
+
+      <div className="grid-2">
+        <DataEntryForm onAddRecord={addRecord} />
+        <Charts records={records} />
+      </div>
+
+      <HistoryTable records={records} onDelete={deleteRecord} />
+    </div>
+  );
+}
+
+export default App;
