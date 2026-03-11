@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCurrency, formatPercent } from '../utils/format';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, Activity, Wallet } from 'lucide-react';
 
 const StatCard = ({ title, value, plData, icon: Icon }) => {
   return (
@@ -45,7 +45,7 @@ export const Dashboard = ({ summary }) => {
   const { current, pl } = summary;
 
   return (
-    <div className="grid-3" style={{ marginBottom: '2rem' }}>
+    <div className="grid-4" style={{ marginBottom: '2rem' }}>
       <StatCard 
         title="Total Assets (NTD)" 
         value={current.totalAssets} 
@@ -57,6 +57,12 @@ export const Dashboard = ({ summary }) => {
         value={current.twAssets} 
         plData={pl.tw} 
         icon={PieChart}
+      />
+      <StatCard 
+        title="Bank Cash" 
+        value={current.cashAssets} 
+        plData={pl.cash} 
+        icon={Wallet}
       />
       <StatCard 
         title="US Stocks" 

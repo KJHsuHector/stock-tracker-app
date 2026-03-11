@@ -16,6 +16,7 @@ export const HistoryTable = ({ records, onDelete }) => {
           <tr>
             <th>Date</th>
             <th>Taiwan Assets</th>
+            <th>Cash Assets</th>
             <th>US Assets</th>
             <th>Total Assets (NTD)</th>
             <th>Rate</th>
@@ -27,6 +28,7 @@ export const HistoryTable = ({ records, onDelete }) => {
             <tr key={record.id}>
               <td style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{formatDate(record.timestamp)}</td>
               <td>{formatCurrency(record.twTotalNtd)}</td>
+              <td>{formatCurrency(record.cashTotalNtd)}</td>
               <td>{formatCurrency(record.usTotalNtd)}</td>
               <td style={{ fontWeight: '600', color: 'var(--success)' }}>{formatCurrency(record.totalNtd)}</td>
               <td style={{ color: 'var(--text-secondary)' }}>{record.exchangeRate.toFixed(2)}</td>

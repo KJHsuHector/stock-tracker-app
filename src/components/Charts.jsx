@@ -20,6 +20,7 @@ export const Charts = ({ records }) => {
       date: formatDate(r.timestamp),
       total: r.totalNtd,
       tw: r.twTotalNtd,
+      cash: r.cashTotalNtd,
       us: r.usTotalNtd,
     }));
   }, [records]);
@@ -97,6 +98,14 @@ export const Charts = ({ records }) => {
               stroke="var(--accent-primary)" 
               strokeWidth={2} 
               dot={{ r: 3, fill: 'var(--accent-primary)', strokeWidth: 0 }} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="cash" 
+              name="Cash Assets" 
+              stroke="#fbbf24" 
+              strokeWidth={2} 
+              dot={{ r: 3, fill: '#fbbf24', strokeWidth: 0 }} 
             />
             <Line 
               type="monotone" 

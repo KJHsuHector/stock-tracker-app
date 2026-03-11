@@ -7,7 +7,17 @@ export const useStockData = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved).sort((a, b) => b.timestamp - a.timestamp); // newest first
+        const parsed = JSON.parse(saved);
+        // Migrate old data on the fly to expose separated cash 
+        return parsed.map(r => {
+          const cashTotalNtd = (r.bankCash || 0) + (r.settlement || 0);
+          return {
+            ...r,
+            cashTotalNtd,
+            twTotalNtd: r.twStocks || 0,
+            totalNtd: (r.twStocks || 0) + cashTotalNtd + (r.usTotalNtd || 0)
+          };
+        }).sort((a, b) => b.timestamp - a.timestamp); // newest first
       }
       return [];
     } catch (e) {
@@ -22,13 +32,15 @@ export const useStockData = () => {
 
   const addRecord = (newRecord) => {
     // Calculate total values
-    const twTotalNtd = newRecord.twStocks + newRecord.bankCash + newRecord.settlement;
+    const cashTotalNtd = newRecord.bankCash + newRecord.settlement;
+    const twTotalNtd = newRecord.twStocks;
     const usTotalNtd = newRecord.usStocksUsd * newRecord.exchangeRate;
-    const totalNtd = twTotalNtd + usTotalNtd;
+    const totalNtd = twTotalNtd + cashTotalNtd + usTotalNtd;
 
     const recordWithTotals = {
       ...newRecord,
       id: Date.now().toString(),
+      cashTotalNtd,
       twTotalNtd,
       usTotalNtd,
       totalNtd,
@@ -68,6 +80,7 @@ export const useStockData = () => {
       current: {
         totalAssets: latest.totalNtd,
         twAssets: latest.twTotalNtd,
+        cashAssets: latest.cashTotalNtd,
         usAssets: latest.usTotalNtd,
         exchangeRate: latest.exchangeRate,
         date: latest.timestamp,
@@ -75,6 +88,7 @@ export const useStockData = () => {
       pl: {
         total: calculateDiff(latest.totalNtd, previous?.totalNtd),
         tw: calculateDiff(latest.twTotalNtd, previous?.twTotalNtd),
+        cash: calculateDiff(latest.cashTotalNtd, previous?.cashTotalNtd),
         us: calculateDiff(latest.usTotalNtd, previous?.usTotalNtd),
       }
     };
