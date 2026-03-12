@@ -91,7 +91,7 @@ export const Dashboard = ({ summary, investmentBase, setInvestmentBase }) => {
         </div>
       </div>
 
-      <div className="grid-4" style={{ marginBottom: '1.5rem' }}>
+      <div className="grid-3" style={{ marginBottom: '1.5rem' }}>
         <StatCard 
           title="Total Profit (本年已賺)" 
           value={current.totalProfit} 
@@ -111,6 +111,9 @@ export const Dashboard = ({ summary, investmentBase, setInvestmentBase }) => {
           plData={pl.total} 
           icon={DollarSign}
         />
+      </div>
+
+      <div className="grid-3" style={{ marginBottom: '1.5rem' }}>
         <StatCard 
           title="Taiwan Stocks" 
           value={current.twAssets} 
