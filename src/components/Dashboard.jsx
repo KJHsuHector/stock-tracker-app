@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { formatCurrency, formatPercent } from '../utils/format';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, Activity, Wallet, Target, Sparkles, Check, Edit2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, Activity, Wallet, Target, Sparkles, Check, Edit2, Cloud, CloudOff, LogIn, LogOut, Loader2 } from 'lucide-react';
 
 const StatCard = ({ title, value, isPercent, plData, icon: Icon, isHighlight }) => {
   return (
@@ -32,7 +32,7 @@ const StatCard = ({ title, value, isPercent, plData, icon: Icon, isHighlight }) 
   );
 };
 
-export const Dashboard = ({ summary, investmentBase, setInvestmentBase }) => {
+export const Dashboard = ({ summary, investmentBase, setInvestmentBase, user, isSyncing, loginWithGoogle, logout }) => {
   const [isEditingBase, setIsEditingBase] = useState(false);
   const [tempBase, setTempBase] = useState(investmentBase.toString());
 
@@ -57,37 +57,63 @@ export const Dashboard = ({ summary, investmentBase, setInvestmentBase }) => {
       <div className="flex-between" style={{ marginBottom: '1rem' }}>
         <h2 className="title" style={{ fontSize: '1.25rem', margin: 0 }}>Portfolio Overview</h2>
         
-        {/* Investment Base Settings */}
-        <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderRadius: '8px' }}>
-          <span className="text-muted" style={{ fontSize: '0.875rem' }}>Annual Investment Base (NTD):</span>
-          {isEditingBase ? (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input 
-                type="number" 
-                className="glass-input" 
-                style={{ padding: '0.25rem 0.5rem', width: '120px' }}
-                value={tempBase}
-                onChange={(e) => setTempBase(e.target.value)}
-                autoFocus
-              />
-              <button className="btn" style={{ padding: '0.25rem 0.5rem' }} onClick={handleSaveBase}>
-                <Check size={16} />
-              </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Investment Base Settings */}
+          <div className="glass-panel" style={{ padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderRadius: '8px' }}>
+            <span className="text-muted" style={{ fontSize: '0.875rem' }}>Base (NTD):</span>
+            {isEditingBase ? (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="number" 
+                  className="glass-input" 
+                  style={{ padding: '0.2rem 0.5rem', width: '100px', fontSize: '0.875rem' }}
+                  value={tempBase}
+                  onChange={(e) => setTempBase(e.target.value)}
+                  autoFocus
+                />
+                <button className="btn" style={{ padding: '0.2rem 0.5rem' }} onClick={handleSaveBase}>
+                  <Check size={14} />
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ fontWeight: '600', color: 'var(--accent-light)', fontSize: '0.9rem' }}>
+                  {formatCurrency(investmentBase)}
+                </span>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ padding: '0.2rem', background: 'transparent', border: 'none' }}
+                  onClick={() => { setTempBase(investmentBase.toString()); setIsEditingBase(true); }}
+                >
+                  <Edit2 size={12} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Cloud Sync Settings */}
+          <div className="glass-panel" style={{ padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderRadius: '8px', border: user ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {isSyncing ? <Loader2 size={16} className="spin text-primary" /> : (user ? <Cloud size={16} color="var(--accent-primary)" /> : <CloudOff size={16} color="var(--text-secondary)" />)}
+              {user ? (
+                <span style={{ fontSize: '0.875rem', color: 'var(--accent-primary)', fontWeight: '600' }} title={user.email}>Sync On</span>
+              ) : (
+                <span className="text-muted" style={{ fontSize: '0.875rem' }}>Sync Off</span>
+              )}
             </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span style={{ fontWeight: '600', color: 'var(--accent-light)' }}>
-                {formatCurrency(investmentBase)}
-              </span>
-              <button 
-                className="btn btn-secondary" 
-                style={{ padding: '0.25rem', background: 'transparent', border: 'none' }}
-                onClick={() => { setTempBase(investmentBase.toString()); setIsEditingBase(true); }}
-              >
-                <Edit2 size={14} />
+            
+            <div style={{ width: '1px', height: '16px', background: 'var(--border-color)' }}></div>
+            
+            {user ? (
+              <button className="btn" style={{ background: 'transparent', color: 'var(--danger)', padding: '0.2rem', border: 'none' }} onClick={logout} title="Logout">
+                <LogOut size={16} />
               </button>
-            </div>
-          )}
+            ) : (
+              <button className="btn btn-primary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', gap: '0.25rem' }} onClick={loginWithGoogle}>
+                <LogIn size={12} /> Login
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

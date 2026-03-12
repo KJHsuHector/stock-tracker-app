@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, setDoc, getDoc } from '../services/firebase';
 
 const STORAGE_KEY = 'stock_tracker_data';
 const BASE_STORAGE_KEY = 'stock_tracker_base';
@@ -33,13 +34,77 @@ export const useStockData = () => {
     }
   });
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-  }, [records]);
 
+  const [user, setUser] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(true);
+  const isInitialLocalLoad = useRef(true);
+
+  // 1. Auth Listener & Initial Cloud Pull
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setIsSyncing(true);
+        try {
+          const docRef = doc(db, 'users_stock', currentUser.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.records) setRecords(data.records);
+            if (data.investmentBase !== undefined) setInvestmentBase(data.investmentBase);
+          }
+        } catch (error) {
+          console.error("Cloud load error", error);
+        } finally {
+          setIsSyncing(false);
+        }
+      } else {
+        setIsSyncing(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Data Persistence (Local + Cloud)
+  useEffect(() => {
+    if (isInitialLocalLoad.current) {
+      isInitialLocalLoad.current = false;
+      return;
+    }
+
+    // Always save locally
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     localStorage.setItem(BASE_STORAGE_KEY, investmentBase.toString());
-  }, [investmentBase]);
+
+    // Save to Cloud if logged in and not currently pulling from it
+    if (user && !isSyncing) {
+      const docRef = doc(db, 'users_stock', user.uid);
+      setDoc(docRef, {
+        records,
+        investmentBase,
+        lastUpdated: Date.now()
+      }, { merge: true }).catch(err => console.error("Cloud sync error", err));
+    }
+  }, [records, investmentBase, user, isSyncing]);
+
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      console.error(e);
+      alert('Login failed');
+    }
+  };
+
+  const logout = async () => {
+    try {
+      if (window.confirm("Logging out will stop cloud sync. Your data remains locally. Continue?")) {
+        await signOut(auth);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const addRecord = (newRecord) => {
     // Calculate total values
@@ -149,6 +214,10 @@ export const useStockData = () => {
     addRecord,
     deleteRecord,
     editRecord,
-    summary: getSummary()
+    summary: getSummary(),
+    user,
+    isSyncing,
+    loginWithGoogle,
+    logout
   };
 };
