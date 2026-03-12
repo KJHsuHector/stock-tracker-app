@@ -18,6 +18,7 @@ export const HistoryTable = ({ records, onDelete, onEdit }) => {
             <th>Taiwan Assets</th>
             <th>Cash Assets</th>
             <th>US Assets</th>
+            <th>Capital Δ</th>
             <th>Total Assets (NTD)</th>
             <th>Rate</th>
             <th>Action</th>
@@ -30,6 +31,9 @@ export const HistoryTable = ({ records, onDelete, onEdit }) => {
               <td>{formatCurrency(record.twTotalNtd)}</td>
               <td>{formatCurrency(record.cashTotalNtd)}</td>
               <td>{formatCurrency(record.usTotalNtd)}</td>
+              <td style={{ color: (record.capitalChange || 0) > 0 ? 'var(--success)' : ((record.capitalChange || 0) < 0 ? 'var(--danger)' : 'var(--text-secondary)') }}>
+                {(record.capitalChange || 0) > 0 ? '+' : ''}{record.capitalChange ? formatCurrency(record.capitalChange) : '-'}
+              </td>
               <td style={{ fontWeight: '600', color: 'var(--success)' }}>{formatCurrency(record.totalNtd)}</td>
               <td style={{ color: 'var(--text-secondary)' }}>{record.exchangeRate.toFixed(2)}</td>
               <td style={{ display: 'flex', gap: '0.5rem' }}>

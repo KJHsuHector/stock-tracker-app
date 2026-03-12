@@ -9,6 +9,7 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
     bankCash: '',
     settlement: '',
     usStocksUsd: '',
+    capitalChange: '',
   });
 
   const [exchangeRate, setExchangeRate] = useState(0);
@@ -24,6 +25,7 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
         bankCash: editingRecord.bankCash,
         settlement: editingRecord.settlement,
         usStocksUsd: editingRecord.usStocksUsd,
+        capitalChange: editingRecord.capitalChange || '',
       });
       setExchangeRate(editingRecord.exchangeRate);
     } else {
@@ -33,6 +35,7 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
         bankCash: '',
         settlement: '',
         usStocksUsd: '',
+        capitalChange: '',
       });
       loadExchangeRate();
     }
@@ -62,6 +65,7 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
       bankCash: Number(formData.bankCash) || 0,
       settlement: Number(formData.settlement) || 0,
       usStocksUsd: Number(formData.usStocksUsd) || 0,
+      capitalChange: Number(formData.capitalChange) || 0,
       exchangeRate: exchangeRate,
     };
 
@@ -76,6 +80,7 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
         bankCash: '',
         settlement: '',
         usStocksUsd: '',
+        capitalChange: '',
       }));
     }
     
@@ -150,6 +155,28 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
               min="0"
               step="1"
             />
+          </div>
+
+          {/* Capital Change */}
+          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="input-label" style={{ color: 'var(--accent-light)' }}>
+              Capital Addition/Reduction (增減資)
+            </label>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <input 
+                type="number" 
+                name="capitalChange"
+                className="glass-input" 
+                placeholder="e.g. 50000 (Add), -10000 (Withdraw)"
+                value={formData.capitalChange}
+                onChange={handleChange}
+                step="1"
+                style={{ flexGrow: 1 }}
+              />
+              <span className="text-muted" style={{ fontSize: '0.8rem', width: '200px' }}>
+                Optional. Leave blank if no funds were injected or withdrawn. Use negative for withdrawals.
+              </span>
+            </div>
           </div>
 
           {/* US Stocks */}

@@ -7,7 +7,7 @@ import { HistoryTable } from './components/HistoryTable';
 import { LineChart } from 'lucide-react';
 
 function App() {
-  const { records, addRecord, deleteRecord, editRecord, summary } = useStockData();
+  const { records, investmentBase, setInvestmentBase, addRecord, deleteRecord, editRecord, summary } = useStockData();
   const [editingRecord, setEditingRecord] = React.useState(null);
 
   const handleEdit = (record) => {
@@ -29,7 +29,11 @@ function App() {
         </div>
       </header>
 
-      <Dashboard summary={summary} />
+      <Dashboard 
+        summary={summary} 
+        investmentBase={investmentBase} 
+        setInvestmentBase={setInvestmentBase} 
+      />
 
       <div className="grid-2">
         <DataEntryForm 
