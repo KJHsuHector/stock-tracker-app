@@ -149,10 +149,9 @@ export const DataEntryForm = ({ onAddRecord, editingRecord, onEditRecord, clearE
               type="number" 
               name="settlement"
               className="glass-input" 
-              placeholder="e.g. 25000"
+              placeholder="e.g. 25000 or -10000"
               value={formData.settlement}
               onChange={handleChange}
-              min="0"
               step="1"
             />
           </div>
