@@ -11,19 +11,31 @@ import {
 } from 'recharts';
 import { formatCurrency, formatDate } from '../utils/format';
 
-export const Charts = ({ records }) => {
+export const Charts = ({ records, investmentBase }) => {
   const chartData = useMemo(() => {
     if (!records || records.length === 0) return [];
     
     // Sort oldest to newest for chronological chart display
-    return [...records].sort((a, b) => a.timestamp - b.timestamp).map(r => ({
-      date: formatDate(r.timestamp),
-      total: r.totalNtd,
-      tw: r.twTotalNtd,
-      cash: r.cashTotalNtd,
-      us: r.usTotalNtd,
-    }));
-  }, [records]);
+    const sortedRecords = [...records].sort((a, b) => a.timestamp - b.timestamp);
+    
+    let cumulativeCapitalChange = 0;
+    
+    return sortedRecords.map(r => {
+      cumulativeCapitalChange += (r.capitalChange || 0);
+      
+      const totalProfit = r.totalNtd - investmentBase - cumulativeCapitalChange;
+      const roi = investmentBase > 0 ? (totalProfit / investmentBase) * 100 : 0;
+
+      return {
+        date: formatDate(r.timestamp),
+        total: r.totalNtd,
+        tw: r.twTotalNtd,
+        cash: r.cashTotalNtd,
+        us: r.usTotalNtd,
+        roi: Number(roi.toFixed(2))
+      };
+    });
+  }, [records, investmentBase]);
 
   if (chartData.length < 2) {
     return (
@@ -45,11 +57,14 @@ export const Charts = ({ records }) => {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }}>
           <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', color: 'var(--text-primary)' }}>{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color, margin: '0.25rem 0', fontSize: '0.875rem' }}>
-              {entry.name}: <span style={{ fontWeight: '600' }}>{formatCurrency(entry.value)}</span>
-            </p>
-          ))}
+          {payload.map((entry, index) => {
+            const valueStr = entry.dataKey === 'roi' ? `${entry.value.toFixed(2)}%` : formatCurrency(entry.value);
+            return (
+              <p key={index} style={{ color: entry.color, margin: '0.25rem 0', fontSize: '0.875rem' }}>
+                {entry.name}: <span style={{ fontWeight: '600' }}>{valueStr}</span>
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -74,15 +89,26 @@ export const Charts = ({ records }) => {
               axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
             />
             <YAxis 
+              yAxisId="left"
               stroke="var(--text-secondary)" 
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} 
               tickFormatter={(val) => `NT$${(val / 10000).toFixed(0)}w`}
               tickLine={false} 
               axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
             />
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              stroke="#fbbf24" 
+              tick={{ fill: '#fbbf24', fontSize: 12 }} 
+              tickFormatter={(val) => `${val}%`}
+              tickLine={false} 
+              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
             <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="total" 
               name="Total Assets" 
@@ -92,6 +118,18 @@ export const Charts = ({ records }) => {
               activeDot={{ r: 6, strokeWidth: 0 }} 
             />
             <Line 
+              yAxisId="right"
+              type="monotone" 
+              dataKey="roi" 
+              name="ROI (%)" 
+              stroke="#fbbf24" 
+              strokeWidth={3} 
+              strokeDasharray="5 5"
+              dot={{ r: 4, fill: '#fbbf24', strokeWidth: 0 }} 
+              activeDot={{ r: 6, strokeWidth: 0 }} 
+            />
+            <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="tw" 
               name="Taiwan Assets" 
@@ -100,20 +138,22 @@ export const Charts = ({ records }) => {
               dot={{ r: 3, fill: 'var(--accent-primary)', strokeWidth: 0 }} 
             />
             <Line 
-              type="monotone" 
-              dataKey="cash" 
-              name="Cash Assets" 
-              stroke="#fbbf24" 
-              strokeWidth={2} 
-              dot={{ r: 3, fill: '#fbbf24', strokeWidth: 0 }} 
-            />
-            <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="us" 
               name="US Assets" 
               stroke="#a855f7" 
               strokeWidth={2} 
               dot={{ r: 3, fill: '#a855f7', strokeWidth: 0 }} 
+            />
+            <Line 
+              yAxisId="left"
+              type="monotone" 
+              dataKey="cash" 
+              name="Cash Assets" 
+              stroke="#9ca3af" 
+              strokeWidth={2} 
+              dot={{ r: 3, fill: '#9ca3af', strokeWidth: 0 }} 
             />
           </LineChart>
         </ResponsiveContainer>

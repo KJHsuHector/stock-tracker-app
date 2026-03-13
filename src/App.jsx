@@ -49,7 +49,7 @@ function App() {
           onEditRecord={editRecord}
           clearEditing={() => setEditingRecord(null)}
         />
-        <Charts records={records} />
+        <Charts records={records} investmentBase={investmentBase} />
       </div>
 
       <HistoryTable 
