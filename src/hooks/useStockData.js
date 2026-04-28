@@ -50,7 +50,25 @@ export const useStockData = () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
-            if (data.records) setRecords(data.records);
+            
+            // Merge cloud records with local records to prevent data loss
+            setRecords(prevLocal => {
+              const cloudRecords = data.records || [];
+              const mergedMap = new Map();
+              
+              // 1. Keep cloud records as the primary source of truth
+              cloudRecords.forEach(r => mergedMap.set(r.id, r));
+              
+              // 2. Add local records that aren't in the cloud (e.g. added offline)
+              prevLocal.forEach(r => {
+                if (!mergedMap.has(r.id)) {
+                  mergedMap.set(r.id, r);
+                }
+              });
+              
+              return Array.from(mergedMap.values()).sort((a, b) => b.timestamp - a.timestamp);
+            });
+            
             if (data.investmentBase !== undefined) setInvestmentBase(data.investmentBase);
           }
         } catch (error) {
